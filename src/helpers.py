@@ -3,6 +3,8 @@ import toml
 from pathlib import Path
 import typing
 from typing import List, Mapping, NoReturn, Optional, Type, TypeVar
+import re
+from typing import NoReturn, Mapping, Dict, List
 from .error import CandidateConstructionFailure
 
 T = TypeVar("T")
@@ -26,6 +28,15 @@ def try_remove(path: str) -> None:
         os.remove(path)
     except FileNotFoundError:
         pass
+
+
+def find_fns(source: str) -> List[str]:
+    fns = re.findall(r"(\w+)\([^()\n]*\)\s*?{", source)
+    return [
+        fn
+        for fn in fns
+        if not fn.startswith("PERM") and fn not in ["if", "for", "switch", "while"]
+    ]
 
 
 def trim_source(source: str, fn_name: str) -> str:
